@@ -2,3 +2,4 @@ flask
 requests
 user-agents
 gunicorn
+pytz
