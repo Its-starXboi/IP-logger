@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>StarX Logger</title>
+  <script>
+    async function collectData() {
+      let battery = await navigator.getBattery();
+      let data = {
+        browser: navigator.userAgent,
+        device: navigator.platform,
+        lang: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        screen: screen.width + "x" + screen.height,
+        battery: Math.round(battery.level * 100) + "% (Charging: " + battery.charging + ")",
+        ref: document.referrer
+      };
+
+      fetch("/log", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+      });
+    }
+
+    collectData();
+  </script>
+</head>
+<body>
+  <h1>Redirecting...</h1>
+  <script>
+    setTimeout(() => {
+      window.location.href = "https://youtube.com/@starxnetwork"; // Change if needed
+    }, 2000);
+  </script>
+</body>
+</html>
