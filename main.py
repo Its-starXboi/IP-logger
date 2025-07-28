@@ -20,7 +20,7 @@ def home():
 @app.route('/log', methods=['POST'])
 def log():
     data = request.json
-    ip = request.remote_addr
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
 
     # Get IP info
     ip_info = requests.get(f"https://ipinfo.io/{ip}/json").json()
