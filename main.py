@@ -16,6 +16,7 @@ def home():
         try:
             data = request.get_json()
             ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+ip = ip.split(",")[0].strip()  # Only first IP (real one)
             user_agent = request.headers.get('User-Agent')
             latitude = data.get('latitude', 'N/A')
             longitude = data.get('longitude', 'N/A')
