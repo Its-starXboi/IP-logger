@@ -1,12 +1,13 @@
 from flask import Flask, request, render_template
 import requests
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
-# ⬇️ Your bot token and chat ID
-BOT_TOKEN = '7638665325:AAEnpRe7ZTHK7VIfyVlM7lfPq9yBpcbhVzo'
-CHAT_ID = '6690693429'
+# Get values from environment variables
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 def send_telegram(msg):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
