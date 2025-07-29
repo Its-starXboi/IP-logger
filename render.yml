@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ip-logger
+    runtime: python
+    buildCommand: ""
+    startCommand: "python3 main.py"
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHAT_ID
+        sync: false
