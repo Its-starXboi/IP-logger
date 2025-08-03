@@ -4,3 +4,4 @@ requests
 user-agents
 gunicorn
 pytz
+python-telegram-bot==20.3
