@@ -24,11 +24,6 @@ A powerful stealth tool to collect:
 
 ---
 
-## 🚀 Deploy to Render
-
-👇 Click below to deploy on Render:
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Its-starXboi/test&env=BOT_TOKEN,CHAT_ID)
 
 📌 **Set these Environment Variables on Render:**
 
