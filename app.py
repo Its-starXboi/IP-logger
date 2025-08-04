@@ -60,6 +60,8 @@ def log():
 🔗 <b>Referrer:</b> {data.get("referrer") or 'None'}
 
 🕒 <b>Time:</b> {india_time}
+
+@StarXNetwork
 """
     send_telegram(msg)
     return {'status': 'ok'}
