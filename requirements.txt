@@ -3,5 +3,5 @@ flask
 requests
 user-agents
 gunicorn
-pytz
+pytz==2023.3
 python-telegram-bot==20.3
